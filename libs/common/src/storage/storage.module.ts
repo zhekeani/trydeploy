@@ -1,9 +1,10 @@
-import { DynamicModule, Module } from '@nestjs/common';
 import { Storage } from '@google-cloud/storage';
-import { ConfigService } from '@nestjs/config';
+import { DynamicModule, Module } from '@nestjs/common';
 
+import { ConfigModule, ConfigModuleConfig, SecretConfig } from '../config';
 import { StorageModuleConfig } from './interfaces/storage-module-config.interface';
 import { StorageService } from './storage.service';
+import { ConfigService } from '@nestjs/config';
 
 @Module({})
 export class StorageModule {
@@ -12,9 +13,16 @@ export class StorageModule {
       ...args: any[]
     ) => Promise<StorageModuleConfig> | StorageModuleConfig;
     inject?: any[];
+    configModuleConfig: ConfigModuleConfig;
   }): DynamicModule {
     return {
       module: StorageModule,
+      imports: [
+        ConfigModule.forRootAsync({
+          loads: options.configModuleConfig.loads,
+          secretConfig: options.configModuleConfig.secretConfig,
+        }),
+      ],
       providers: [
         StorageService,
         {

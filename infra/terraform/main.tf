@@ -60,10 +60,21 @@ module "dummy_secret_version" {
 }
 
 # Assign secret accessor role to service account
-module "secret_accessor_iam_member" {
+module "secret_accessor_iam_member_dummy_secret" {
   source                = "./modules/iam-member/secret-manager/secret-accessor"
   service_account_email = module.service_account.sa_properties["secret_accessor"].email
   secret_name           = module.dummy_secret_version.secret_name
 }
 
+
+# Assign secret accessor role to service account
+module "secret_accessor_iam_member_sa_keys" {
+  for_each = module.sa_private_key_secrets
+
+  source                = "./modules/iam-member/secret-manager/secret-accessor"
+  service_account_email = module.service_account.sa_properties["secret_accessor"].email
+  secret_name           = each.value.secret_name
+
+  depends_on = [module.sa_private_key_secrets]
+}
 

@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
-import { DatabaseConfig, SecretConfig } from '@app/common';
+import { DatabaseConfig, SecretConfig, StorageConfig } from '@app/common';
 import * as cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
 
@@ -22,7 +22,7 @@ async function bootstrap() {
   );
 
   await app.listen(3000);
-  console.log('this is from Secret Config ', secrets.dummy_secret);
+  console.log('this is from Secret Config ', secrets);
   console.log(rawDummyEnv);
 }
 bootstrap();

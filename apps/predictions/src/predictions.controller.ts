@@ -1,5 +1,13 @@
-import { Controller, Get } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+  Body,
+} from '@nestjs/common';
 import { PredictionsService } from './predictions.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller()
 export class PredictionsController {
@@ -13,5 +21,14 @@ export class PredictionsController {
   @Get('/dummy')
   getDummySecret(): string {
     return this.predictionsService.getDummySecret();
+  }
+
+  @Post('/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: { fileName: string },
+  ) {
+    return this.predictionsService.uploadPic(file, body.fileName);
   }
 }
