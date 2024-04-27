@@ -15,17 +15,36 @@ module "project-services" {
   ]
 }
 
+locals {
+  service_accounts = {
+    secret_accessor = {
+      account_id = "${var.environment.prefix}-secret-accessor"
+      display_name = "Service Account - ${var.environment.type} secret accessor"
+    }
+    object_admin = {
+      account_id   = "${var.environment.prefix}-object-admin"
+      display_name = "Service Account - ${var.environment.type} storage object admin."
+    }
+  }
+
+}
+
+
 # Create service account for reading or pulling artifacts in artifact registry
-resource "google_service_account" "secret_accessor" {
-  account_id   = "${var.environment.prefix}-secret-accessor"
-  display_name = "Service Account - ${var.environment.type} secret accessor"
+resource "google_service_account" "trydeploy" {
+  for_each = local.service_accounts
+
+  account_id   = each.value.account_id
+  display_name = each.value.display_name
 
   depends_on = [module.project-services]
 }
 
 # Generate service account key
-resource "google_service_account_key" "secret_accessor" {
-  service_account_id = google_service_account.secret_accessor.name
+resource "google_service_account_key" "trydeploy" {
+  for_each = google_service_account.trydeploy
 
-  depends_on = [google_service_account.secret_accessor]
+  service_account_id = each.value.name
+
+  depends_on = [google_service_account.trydeploy]
 }

@@ -10,7 +10,7 @@ async function bootstrap() {
   const app = await NestFactory.create(PredictionsModule);
 
   const configService = app.get(ConfigService);
-  const secretConfig = configService.get<SecretConfig>('secret');
+  const secrets = configService.get('secrets');
   const rawDummyEnv = configService.get('DUMMY_ENV');
 
   app.use(cookieParser());
@@ -22,8 +22,7 @@ async function bootstrap() {
   );
 
   await app.listen(3000);
-  console.log('this is from Secret Config ', secretConfig.secretAccessorKey);
-  console.log('this is dummy secret version', secretConfig.dummy);
+  console.log('this is from Secret Config ', secrets.dummy_secret);
   console.log(rawDummyEnv);
 }
 bootstrap();

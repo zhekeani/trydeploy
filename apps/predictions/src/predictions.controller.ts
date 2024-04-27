@@ -9,4 +9,9 @@ export class PredictionsController {
   getHello(): string {
     return this.predictionsService.getHello();
   }
+
+  @Get('/dummy')
+  getDummySecret(): string {
+    return this.predictionsService.getDummySecret();
+  }
 }

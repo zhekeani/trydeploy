@@ -8,4 +8,10 @@ export class PredictionsService {
   getHello(): string {
     return 'Hello World!';
   }
+
+  getDummySecret(): string {
+    const secrets = this.configService.get('secrets');
+
+    return secrets.dummy_secret;
+  }
 }

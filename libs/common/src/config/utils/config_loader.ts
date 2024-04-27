@@ -20,7 +20,7 @@ export interface CustomConfigLoaderOptions {
   secretManagerServiceClient?: SecretManagerServiceClient;
 }
 
-const rewriteRecordWithSecrets = async (
+export const rewriteRecordWithSecrets = async (
   records: any,
   level: string = '',
   secretManagerServiceClient?: SecretManagerServiceClient,
