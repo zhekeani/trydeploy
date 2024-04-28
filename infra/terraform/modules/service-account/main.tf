@@ -25,6 +25,10 @@ locals {
       account_id   = "${var.environment.prefix}-object-admin"
       display_name = "Service Account - ${var.environment.type} storage object admin."
     }
+    kubernetes_engine = {
+      account_id = "${var.environment.prefix}-kubernetes-engine"
+      display_name = "Service Account - ${var.environment.type} Kubernetes Engine."
+    }
   }
 
 }

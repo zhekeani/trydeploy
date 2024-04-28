@@ -29,6 +29,14 @@ module storage_bucket {
   object_admin_sa_email = module.service_account.sa_properties["object_admin"].email
 }
 
+# Create Artifact Registry Repositories
+module artifact_registry {
+  source = "./modules/artifact-registry"
+  location = local.region
+  environment = local.environment
+}
+
+
 # Create and store secret for Services Config
 module "services_config_secret" {
   source               = "./modules/secret"
@@ -78,3 +86,22 @@ module "secret_accessor_iam_member_sa_keys" {
   depends_on = [module.sa_private_key_secrets]
 }
 
+data "google_secret_manager_secrets" "all" {
+}
+
+# Create kubernetes engine
+module kubernetes_engine {
+  source = "./modules/kubernetes-engine"
+  location = local.region
+  environment = local.environment
+  service_account_email = module.service_account.sa_properties["kubernetes_engine"].email
+}
+
+module kubernetes_engine_sa_iam {
+  source = "./modules/iam-member/kubernetes-engine"
+  location = local.region
+  service_account_email = module.service_account.sa_properties["kubernetes_engine"].email
+  secrets_name = [for secret in data.google_secret_manager_secrets.all.secrets : secret.name]
+  bucket_name = module.storage_bucket.bucket_name
+  repositories_name = [for repository in values(module.artifact_registry.nestjs_repositories_name) : repository.repository_name]
+}

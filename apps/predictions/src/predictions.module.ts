@@ -1,20 +1,16 @@
-import { Module } from '@nestjs/common';
-import {
-  ConfigService,
-  ConfigModule as NestConfigModule,
-} from '@nestjs/config';
-import { PredictionsController } from './predictions.controller';
-import { PredictionsService } from './predictions.service';
-import { databaseConfig } from './config/config_files/database.config';
-import { secretConfig } from './config/config_files/secret.config';
 import {
   ConfigModule,
-  SecretConfig,
   ServiceAccountKey,
   StorageConfig,
   StorageModule,
 } from '@app/common';
+import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { databaseConfig } from './config/config_files/database.config';
+import { secretConfig } from './config/config_files/secret.config';
 import { storageConfig } from './config/config_files/storage.config';
+import { PredictionsController } from './predictions.controller';
+import { PredictionsService } from './predictions.service';
 
 @Module({
   imports: [
