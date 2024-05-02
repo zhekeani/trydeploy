@@ -21,18 +21,18 @@ module "service_account" {
 }
 
 # Create storage bucket
-module storage_bucket {
-  source = "./modules/storage-bucket"
-  location = local.region
-  environment = local.environment
-  bucket_name = local.storage_bucket_name
+module "storage_bucket" {
+  source                = "./modules/storage-bucket"
+  location              = local.region
+  environment           = local.environment
+  bucket_name           = local.storage_bucket_name
   object_admin_sa_email = module.service_account.sa_properties["object_admin"].email
 }
 
 # Create Artifact Registry Repositories
-module artifact_registry {
-  source = "./modules/artifact-registry"
-  location = local.region
+module "artifact_registry" {
+  source      = "./modules/artifact-registry"
+  location    = local.region
   environment = local.environment
 }
 
@@ -86,22 +86,50 @@ module "secret_accessor_iam_member_sa_keys" {
   depends_on = [module.sa_private_key_secrets]
 }
 
+# compute VPC for GKE
+module "compute_vpc" {
+  source      = "./modules/vpc"
+  location    = local.region
+  environment = local.environment
+}
+
+locals {
+  cluster_region   = "asia-southeast1"
+  gke_network_name = module.compute_vpc.network.name
+  gke_subnet_name  = module.compute_vpc.subnets.names[0]
+
+  gke_secondary_range_pods = {
+    name       = module.compute_vpc.subnets.secondary_ranges[0][0].range_name
+    cidr_range = module.compute_vpc.subnets.secondary_ranges[0][0].ip_cidr_range
+  }
+  gke_secondary_range_services = {
+    name       = module.compute_vpc.subnets.secondary_ranges[0][1].range_name
+    cidr_range = module.compute_vpc.subnets.secondary_ranges[0][1].ip_cidr_range
+  }
+}
+
+
 data "google_secret_manager_secrets" "all" {
 }
 
-# Create kubernetes engine
-module kubernetes_engine {
-  source = "./modules/kubernetes-engine"
-  location = local.region
-  environment = local.environment
+module "kubernetes_engine_sa_iam" {
+  source                = "./modules/iam-member/kubernetes-engine"
+  location              = local.region
   service_account_email = module.service_account.sa_properties["kubernetes_engine"].email
+  secrets_name          = [for secret in data.google_secret_manager_secrets.all.secrets : secret.name]
+  bucket_name           = module.storage_bucket.bucket_name
+  repositories_name     = [for repository in values(module.artifact_registry.nestjs_repositories_name) : repository.repository_name]
 }
 
-module kubernetes_engine_sa_iam {
-  source = "./modules/iam-member/kubernetes-engine"
-  location = local.region
-  service_account_email = module.service_account.sa_properties["kubernetes_engine"].email
-  secrets_name = [for secret in data.google_secret_manager_secrets.all.secrets : secret.name]
-  bucket_name = module.storage_bucket.bucket_name
-  repositories_name = [for repository in values(module.artifact_registry.nestjs_repositories_name) : repository.repository_name]
+# Create kubernetes engine
+module "kubernetes_engine" {
+  source                   = "./modules/kubernetes-engine"
+  location                 = local.region
+  environment              = local.environment
+  service_account_email    = module.service_account.sa_properties["kubernetes_engine"].email
+  network_name             = local.gke_network_name
+  subnet_name              = local.gke_subnet_name
+  secondary_range_pods     = local.gke_secondary_range_pods
+  secondary_range_services = local.gke_secondary_range_services
 }
+

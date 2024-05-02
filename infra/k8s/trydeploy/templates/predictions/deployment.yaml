@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "trydeploy.predictions.name" .}}
+  labels:
+    {{- include "trydeploy.predictions.labels" . | nindent 4 }}
+
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "trydeploy.predictions.selectorLabels" . | nindent 6}}
+
+  template:
+    metadata:
+      labels:
+        {{- include "trydeploy.predictions.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - image: {{ include "trydeploy.predictions.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          name: {{ include "trydeploy.predictions.name" . }}
+          ports:
+          {{- range .Values.microServices.predictions.ports }}
+            - {{ dict "containerPort" .  | toYaml }}
+          {{- end }}
+          env:
+            - name: NODE_ENV
+              value: {{ .Values.nodeEnv }}
+          {{- range .Values.commonEnv }}
+            - name: {{ .name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .secretKeyRef.name }}
+                  key: {{ .secretKeyRef.key }}
+          {{- end }}

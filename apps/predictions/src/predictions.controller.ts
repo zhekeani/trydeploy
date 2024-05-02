@@ -9,7 +9,7 @@ import {
 import { PredictionsService } from './predictions.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-@Controller()
+@Controller('predictions')
 export class PredictionsController {
   constructor(private readonly predictionsService: PredictionsService) {}
 

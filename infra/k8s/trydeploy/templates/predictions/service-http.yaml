@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "trydeploy.predictions.service.http.name" . }}
+  labels:
+    {{- include "trydeploy.predictions.labels" . | nindent 4 }}
+spec:
+  {{- with .Values.microServices.predictions.services.http }}
+  type: {{ .type }}
+  ports:
+    - name: {{ quote .port.name }}
+      port: {{ .port.number }}
+      protocol: TCP
+      targetPort: {{ .port.number }}
+  {{- end }}
+  selector:
+    {{- include "trydeploy.predictions.labels" . | nindent 4 }}

@@ -10,8 +10,8 @@ output "secret_accessor_svc" {
   description = "Service account to be assigned with secret accessor role."
 }
 
-output sa_private_keys {
-  value       = {
+output "sa_private_keys" {
+  value = {
     for service_account_name, service_account in google_service_account_key.trydeploy :
     service_account_name => service_account.private_key
   }
@@ -22,7 +22,7 @@ output sa_private_keys {
 
 
 output "sa_properties" {
-  value       = {
+  value = {
     for service_account_name, service_account in google_service_account.trydeploy :
     service_account_name => service_account
   }

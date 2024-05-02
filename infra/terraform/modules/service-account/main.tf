@@ -18,7 +18,7 @@ module "project-services" {
 locals {
   service_accounts = {
     secret_accessor = {
-      account_id = "${var.environment.prefix}-secret-accessor"
+      account_id   = "${var.environment.prefix}-secret-accessor"
       display_name = "Service Account - ${var.environment.type} secret accessor"
     }
     object_admin = {
@@ -26,11 +26,14 @@ locals {
       display_name = "Service Account - ${var.environment.type} storage object admin."
     }
     kubernetes_engine = {
-      account_id = "${var.environment.prefix}-kubernetes-engine"
+      account_id   = "${var.environment.prefix}-kubernetes-engine"
       display_name = "Service Account - ${var.environment.type} Kubernetes Engine."
     }
+    artifact_registry_reader = {
+      account_id   = "${var.environment.prefix}-ar-reader"
+      display_name = "Service Account - ${var.environment.type} Artifact Registry Reader."
+    }
   }
-
 }
 
 
@@ -51,4 +54,10 @@ resource "google_service_account_key" "trydeploy" {
   service_account_id = each.value.name
 
   depends_on = [google_service_account.trydeploy]
+}
+
+
+module "sa_iam_ar_reader" {
+  source                = "../iam-member/artifact-registry-reader"
+  service_account_email = google_service_account.trydeploy["artifact_registry_reader"].email
 }

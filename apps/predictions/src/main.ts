@@ -1,8 +1,8 @@
-import { NestFactory } from '@nestjs/core';
-import { ConfigService } from '@nestjs/config';
-import { DatabaseConfig, SecretConfig, StorageConfig } from '@app/common';
-import * as cookieParser from 'cookie-parser';
+import { ServicesConfig } from '@app/common';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
+import * as cookieParser from 'cookie-parser';
 
 import { PredictionsModule } from './predictions.module';
 
@@ -10,8 +10,7 @@ async function bootstrap() {
   const app = await NestFactory.create(PredictionsModule);
 
   const configService = app.get(ConfigService);
-  const secrets = configService.get('secrets');
-  const rawDummyEnv = configService.get('DUMMY_ENV');
+  const servicesConfig = configService.get<ServicesConfig>('services');
 
   app.use(cookieParser());
 
@@ -21,8 +20,6 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(3000);
-  console.log('this is from Secret Config ', secrets);
-  console.log(rawDummyEnv);
+  await app.listen(servicesConfig.predictions.http_port);
 }
 bootstrap();

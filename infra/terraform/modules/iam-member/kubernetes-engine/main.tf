@@ -15,7 +15,7 @@ module "project-services" {
   ]
 }
 
-variable location {
+variable "location" {
   type        = string
   description = "Project's location."
 }
@@ -31,12 +31,12 @@ variable "secrets_name" {
   description = "Secret name to be granted access."
 }
 
-variable bucket_name {
+variable "bucket_name" {
   type        = string
   description = "Storage bucket name that will be accessed by Kubernetes service account."
 }
 
-variable repositories_name {
+variable "repositories_name" {
   type        = list(string)
   description = "The name of the repositories in Artifact Registry where the Kubernetes Engine container image is stored."
 }
@@ -48,7 +48,7 @@ module "project_iam_bindings" {
   source  = "terraform-google-modules/iam/google//modules/projects_iam"
   version = "~> 7.7"
 
-  projects          = [data.google_project.current.project_id]
+  projects = [data.google_project.current.project_id]
 
   bindings = {
     "roles/container.clusterAdmin" = [
@@ -70,6 +70,9 @@ module "project_iam_bindings" {
       "serviceAccount:${var.service_account_email}",
     ]
     "roles/iam.roleViewer" = [
+      "serviceAccount:${var.service_account_email}",
+    ]
+    "roles/artifactregistry.reader" = [
       "serviceAccount:${var.service_account_email}",
     ]
   }
@@ -105,7 +108,6 @@ resource "google_artifact_registry_repository_iam_binding" "binding" {
 resource "google_secret_manager_secret_iam_member" "member" {
   for_each = toset(var.secrets_name)
 
-  project   = data.google_project.current.project_id
   secret_id = each.value
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${var.service_account_email}"

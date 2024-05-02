@@ -1,5 +1,6 @@
 import {
   ConfigModule,
+  HealthModule,
   ServiceAccountKey,
   StorageConfig,
   StorageModule,
@@ -11,11 +12,13 @@ import { secretConfig } from './config/config_files/secret.config';
 import { storageConfig } from './config/config_files/storage.config';
 import { PredictionsController } from './predictions.controller';
 import { PredictionsService } from './predictions.service';
+import { servicesConfig } from './config/config_files/services.config';
 
 @Module({
   imports: [
+    HealthModule,
     ConfigModule.forRootAsync({
-      loads: [databaseConfig, secretConfig, storageConfig],
+      loads: [databaseConfig, secretConfig, storageConfig, servicesConfig],
       secretConfig: secretConfig,
     }),
     StorageModule.forRootAsync({
